@@ -1,4 +1,13 @@
-// TCS230 or TCS3200 pins wiring to Arduino
+   
+   // Created by Lachlan Becker
+   // Grade 8
+   // Commonly known online as moob453  
+   // Made for the Uni SA Stemia camera dolly
+   // Purpose is to make a robot follow a black line
+   // Must be used on a white or bright envoirment
+   // 
+   
+   // Pins for the color sensor
 #define S0 12
 #define S1 13
 #define S2 11
@@ -6,19 +15,17 @@
 #define sensorOut 8
 
 // Motor control pins
-#define leftMotorPin1 4
-#define leftMotorPin2 5
-#define rightMotorPin1 6
-#define rightMotorPin2 7
+#define leftMotorPin 4
+#define rightMotorPin 5
 
-// Stores frequency read by the photodiodes
-int redFrequency = 0;
-int greenFrequency = 0;
-int blueFrequency = 0;
+// Calibration thresholds
+const int redThreshold = 100;    // Adjust these values based on calibration
+const int greenThreshold = 100;  // Adjust these values based on calibration
+const int blueThreshold = 100;   // Adjust these values based on calibration
 
-// Thresholds for color detection
-const int blackThreshold = 1000;
-const int whiteThreshold = 500;
+// Motor control speed
+const int motorSpeed = 500000;  // Adjust this value to control motor speed(bigger means slower)
+const int turnDelay = 0;   // Delay for turn action
 
 void setup() {
   // Setting the outputs
@@ -31,10 +38,8 @@ void setup() {
   pinMode(sensorOut, INPUT);
   
   // Motor control pins as outputs
-  pinMode(leftMotorPin1, OUTPUT);
-  pinMode(leftMotorPin2, OUTPUT);
-  pinMode(rightMotorPin1, OUTPUT);
-  pinMode(rightMotorPin2, OUTPUT);
+  pinMode(leftMotorPin, OUTPUT);
+  pinMode(rightMotorPin, OUTPUT);
   
   // Setting frequency scaling to 20%
   digitalWrite(S0, HIGH);
@@ -42,73 +47,52 @@ void setup() {
   
   // Begins serial communication 
   Serial.begin(9600);
-  
-  // Wait a moment for serial connection to initialize
-  delay(1000);
 }
 
 void loop() {
-  // Read color frequencies
-  readColorFrequencies();
-  
-  // Output color signals to the serial monitor
-  Serial.print("R = ");
-  Serial.print(redFrequency);
-  Serial.print(" | G = ");
-  Serial.print(greenFrequency);
-  Serial.print(" | B = ");
-  Serial.println(blueFrequency);
-  
-  // Line-following logic
-  if (redFrequency < blackThreshold && greenFrequency < blackThreshold && blueFrequency < blackThreshold) {
-    // Black surface detected, go straight
+  int redFrequency = readFrequency(S2, S3);
+  int greenFrequency = readFrequency(S2, S3);
+  int blueFrequency = readFrequency(S2, S3);
+
+  if (redFrequency > redThreshold && greenFrequency > greenThreshold && blueFrequency > blueThreshold) {
+    // Black surface detected
+    Serial.println("Color: Black");
+    turnLeft();
+    delay(turnDelay);
+  } else if (redFrequency < redThreshold && greenFrequency < greenThreshold && blueFrequency < blueThreshold) {
+    // White surface detected
+    Serial.println("Color: White");
     goStraight();
+    delay();
   } else {
-    // White surface detected, adjust direction
-    if (redFrequency > whiteThreshold) {
-      // Turn right
-      turnRight();
-    } else if (blueFrequency > whiteThreshold) {
-      // Turn left
-      turnLeft();
-    } else {
-      // Go straight as default
-      goStraight();
-    }
+    // Gray area
+    Serial.println("Color: Gray");
+    goStraight();
   }
 }
 
-void readColorFrequencies() {
-  digitalWrite(S2, LOW);
-  digitalWrite(S3, LOW);
-  redFrequency = pulseIn(sensorOut, LOW);
-  
-  digitalWrite(S2, HIGH);
-  digitalWrite(S3, HIGH);
-  greenFrequency = pulseIn(sensorOut, LOW);
-  
-  digitalWrite(S2, LOW);
-  digitalWrite(S3, HIGH);
-  blueFrequency = pulseIn(sensorOut, LOW);
+int readFrequency(int s2Pin, int s3Pin) {
+  digitalWrite(s2Pin, LOW);
+  digitalWrite(s3Pin, LOW);
+  int frequency = pulseIn(sensorOut, LOW);
+  return frequency;
 }
 
 void goStraight() {
-  analogWrite(leftMotorPin1, 170);  // Adjust PWM value for slower movement
-  digitalWrite(leftMotorPin2, LOW);
-  analogWrite(rightMotorPin1, 170);  // Adjust PWM value for slower movement
-  digitalWrite(rightMotorPin2, LOW);
+  digitalWrite(leftMotorPin, HIGH);
+  delay(1);
+  digitalWrite(leftMotorPin, LOW);
+  delay(1);
+  digitalWrite(rightMotorPin, HIGH);
+  delay(1);
+  digitalWrite(rightMotorPin, LOW);
+  delay(1);
 }
 
 void turnLeft() {
-  digitalWrite(leftMotorPin1, LOW);
-  analogWrite(leftMotorPin2, 180);  // Adjust PWM value for slower turning
-  analogWrite(rightMotorPin1, 180);  // Adjust PWM value for slower turning
-  digitalWrite(rightMotorPin2, LOW);
+  digitalWrite(leftMotorPin, HIGH);
+  digitalWrite(rightMotorPin, LOW);
+  
 }
 
-void turnRight() {
-  analogWrite(leftMotorPin1, 180);  // Adjust PWM value for slower turning
-  digitalWrite(leftMotorPin2, LOW);
-  digitalWrite(rightMotorPin1, LOW);
-  analogWrite(rightMotorPin2, 180);  // Adjust PWM value for slower turning
-}
+// Add turnRight() and stopMotors() functions as well
