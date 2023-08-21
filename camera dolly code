@@ -24,7 +24,7 @@ const int greenThreshold = 100;  // Adjust these values based on calibration
 const int blueThreshold = 100;   // Adjust these values based on calibration
 
 // Motor control speed
-const int motorSpeed = 500000;  // Adjust this value to control motor speed(bigger means slower)
+const int motorSpeed = 500;  // Adjust this value to control motor speed(bigger means slower)
 const int turnDelay = 0;   // Delay for turn action
 
 void setup() {
@@ -62,8 +62,8 @@ void loop() {
   } else if (redFrequency < redThreshold && greenFrequency < greenThreshold && blueFrequency < blueThreshold) {
     // White surface detected
     Serial.println("Color: White");
-    goStraight();
-    delay();
+    goVerySlow();
+    
   } else {
     // Gray area
     Serial.println("Color: Gray");
@@ -80,13 +80,21 @@ int readFrequency(int s2Pin, int s3Pin) {
 
 void goStraight() {
   digitalWrite(leftMotorPin, HIGH);
-  delay(1);
   digitalWrite(leftMotorPin, LOW);
-  delay(1);
   digitalWrite(rightMotorPin, HIGH);
-  delay(1);
   digitalWrite(rightMotorPin, LOW);
-  delay(1);
+  delay(100);
+  
+}
+
+
+void goVerySlow() {
+  digitalWrite(leftMotorPin, HIGH);
+  digitalWrite(rightMotorPin, HIGH);
+  delay(100);  // Adjust this delay to control the speed
+  digitalWrite(leftMotorPin, LOW);
+  digitalWrite(rightMotorPin, LOW);
+  delay(100);  // Adjust this delay to control the speed
 }
 
 void turnLeft() {
