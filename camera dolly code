@@ -1,4 +1,3 @@
-   
    // Created by Lachlan Becker
    // Grade 8
    // Commonly known online as moob453  
@@ -6,101 +5,91 @@
    // Purpose is to make a robot follow a black line
    // Must be used on a white or bright envoirment
    // 
-   
-   // Pins for the color sensor
-#define S0 12
-#define S1 13
-#define S2 11
-#define S3 10
-#define sensorOut 8
 
-// Motor control pins
-#define leftMotorPin 4
-#define rightMotorPin 5
+   //defining motor pins
 
-// Calibration thresholds
-const int redThreshold = 100;    // Adjust these values based on calibration
-const int greenThreshold = 100;  // Adjust these values based on calibration
-const int blueThreshold = 100;   // Adjust these values based on calibration
+   #define MOTOR_L 5
+   #define MOTOR_LB 10
+   #define MOTOR_R 6
+   #define MOTOR_RB 11
 
-// Motor control speed
-const int motorSpeed = 500;  // Adjust this value to control motor speed(bigger means slower)
-const int turnDelay = 0;   // Delay for turn action
+   //define sensor pins
 
-void setup() {
-  // Setting the outputs
-  pinMode(S0, OUTPUT);
-  pinMode(S1, OUTPUT);
-  pinMode(S2, OUTPUT);
-  pinMode(S3, OUTPUT);
-  
-  // Setting the sensorOut as an input
-  pinMode(sensorOut, INPUT);
-  
-  // Motor control pins as outputs
-  pinMode(leftMotorPin, OUTPUT);
-  pinMode(rightMotorPin, OUTPUT);
-  
-  // Setting frequency scaling to 20%
-  digitalWrite(S0, HIGH);
-  digitalWrite(S1, LOW);
-  
-  // Begins serial communication 
-  Serial.begin(9600);
-}
+   #define LEFT_INFA 12
+   #define RIGHT_INFA 13
+
+   void setup() {
+    //setting outputs
+    pinMode(MOTOR_L, OUTPUT);
+    pinMode(MOTOR_LB, OUTPUT);
+    pinMode(MOTOR_R, OUTPUT);
+    pinMode(MOTOR_RB, OUTPUT);
+
+    //setting inputs
+    pinMode(LEFT_INFA, INPUT);
+    pinMode(RIGHT_INFA, INPUT);
+
+    //starting serial communication
+    Serial.begin(9600);
+   }
 
 void loop() {
-  int redFrequency = readFrequency(S2, S3);
-  int greenFrequency = readFrequency(S2, S3);
-  int blueFrequency = readFrequency(S2, S3);
+    //converting raw signal to value
+    int LEFT_VALUE = digitalRead(LEFT_INFA);
+    int RIGHT_VALUE = digitalRead(RIGHT_INFA);
 
-  if (redFrequency > redThreshold && greenFrequency > greenThreshold && blueFrequency > blueThreshold) {
-    // Black surface detected
-    Serial.println("Color: Black");
-    turnLeft();
-    delay(turnDelay);
-  } else if (redFrequency < redThreshold && greenFrequency < greenThreshold && blueFrequency < blueThreshold) {
-    // White surface detected
-    Serial.println("Color: White");
-    goVerySlow();
-    
-  } else {
-    // Gray area
-    Serial.println("Color: Gray");
-    goStraight();
-  }
+    //both detect black activate
+    if (RIGHT_VALUE == HIGH && LEFT_VALUE == HIGH) {
+        Serial.println("Both black");
+        STOP();
+
+    //left sensed black activate
+    } else if (LEFT_VALUE == HIGH) {
+        Serial.println("Left Black");
+        TURN_RIGHT();
+
+    //right sensed black activate
+    } else if (RIGHT_VALUE == HIGH) {
+        Serial.println("Right black");
+        TURN_LEFT();
+
+    //Both detect white activate
+    } else if (RIGHT_VALUE == LOW && LEFT_VALUE == LOW) {
+        Serial.println("Both white");
+        STRAIGHT();
+    }
 }
 
-int readFrequency(int s2Pin, int s3Pin) {
-  digitalWrite(s2Pin, LOW);
-  digitalWrite(s3Pin, LOW);
-  int frequency = pulseIn(sensorOut, LOW);
-  return frequency;
-}
-
-void goStraight() {
-  digitalWrite(leftMotorPin, HIGH);
-  digitalWrite(leftMotorPin, LOW);
-  digitalWrite(rightMotorPin, HIGH);
-  digitalWrite(rightMotorPin, LOW);
-  delay(100);
+   //TURNS ROBOT RIGHT
+   void TURN_RIGHT() {
+    digitalWrite(MOTOR_L, HIGH);
+    digitalWrite(MOTOR_R, LOW);
+   }
+   
+   //TURNS ROBOT LEFT
+   void TURN_LEFT() {
+    digitalWrite(MOTOR_R, HIGH);
+    digitalWrite(MOTOR_L, LOW);
+   }
   
-}
+   //MAKES ROBOT GO STRAIGHT
+   void STRAIGHT() {
+    digitalWrite(MOTOR_L, HIGH);
+    delay(500);
+    digitalWrite(MOTOR_R, HIGH);
+    delay(500);
+   }
 
 
-void goVerySlow() {
-  digitalWrite(leftMotorPin, HIGH);
-  digitalWrite(rightMotorPin, HIGH);
-  delay(100);  // Adjust this delay to control the speed
-  digitalWrite(leftMotorPin, LOW);
-  digitalWrite(rightMotorPin, LOW);
-  delay(100);  // Adjust this delay to control the speed
-}
+   //STOP
+   void STOP() {
+    digitalWrite(MOTOR_L, LOW);
+    digitalWrite(MOTOR_R, LOW);
+   }
 
-void turnLeft() {
-  digitalWrite(leftMotorPin, HIGH);
-  digitalWrite(rightMotorPin, LOW);
-  
-}
 
-// Add turnRight() and stopMotors() functions as well
+
+
+
+
+
