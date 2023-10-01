@@ -12,6 +12,8 @@
    #define MOTOR_LB 10
    #define MOTOR_R 6
    #define MOTOR_RB 11
+   #define MOTOR_VOLT 3
+   #define MOTOR_VOLTR 10
 
    //define sensor pins
 
@@ -24,6 +26,7 @@
     pinMode(MOTOR_LB, OUTPUT);
     pinMode(MOTOR_R, OUTPUT);
     pinMode(MOTOR_RB, OUTPUT);
+    pinMode(MOTOR_VOLT, OUTPUT);
 
     //setting inputs
     pinMode(LEFT_INFA, INPUT);
@@ -38,25 +41,31 @@ void loop() {
     int LEFT_VALUE = digitalRead(LEFT_INFA);
     int RIGHT_VALUE = digitalRead(RIGHT_INFA);
 
+    //SETS MOTOR VOLTAGE    255 MAX
+    int MOTOR_SPEED = 120;
+    analogWrite(MOTOR_VOLT, MOTOR_SPEED - 10);
+    analogWrite(MOTOR_VOLTR, MOTOR_SPEED - 10);
+
     //both detect black activate
     if (RIGHT_VALUE == HIGH && LEFT_VALUE == HIGH) {
         Serial.println("Both black");
-        STOP();
+        TURN_LEFT();
+
+      //Both detect white activate
+    } else if (RIGHT_VALUE == LOW && LEFT_VALUE == LOW) {
+        Serial.println("Both white");
+        STRAIGHT();
 
     //left sensed black activate
-    } else if (LEFT_VALUE == HIGH) {
+    } else if (LEFT_VALUE == LOW) {
         Serial.println("Left Black");
         TURN_RIGHT();
 
     //right sensed black activate
-    } else if (RIGHT_VALUE == HIGH) {
+    } else if (RIGHT_VALUE == LOW) {
         Serial.println("Right black");
         TURN_LEFT();
 
-    //Both detect white activate
-    } else if (RIGHT_VALUE == LOW && LEFT_VALUE == LOW) {
-        Serial.println("Both white");
-        STRAIGHT();
     }
 }
 
@@ -75,9 +84,9 @@ void loop() {
    //MAKES ROBOT GO STRAIGHT
    void STRAIGHT() {
     digitalWrite(MOTOR_L, HIGH);
-    delay(500);
+    digitalWrite(MOTOR_L, LOW);
     digitalWrite(MOTOR_R, HIGH);
-    delay(500);
+    digitalWrite(MOTOR_R, LOW);
    }
 
 
