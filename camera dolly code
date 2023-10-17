@@ -6,6 +6,11 @@
    // Must be used on a white or bright envoirment
    // 
 
+
+   //adding changable ints
+   int time = 0;
+
+
    //defining motor pins
 
    #define MOTOR_L 5
@@ -21,6 +26,7 @@
    #define RIGHT_INFA 13
 
    void setup() {
+
     //setting outputs
     pinMode(MOTOR_L, OUTPUT);
     pinMode(MOTOR_LB, OUTPUT);
@@ -37,17 +43,28 @@
    }
 
 void loop() {
+
+    //Robots sense of time
+    time = time + 1;
+    Serial.println(time);
+
     //converting raw signal to value
     int LEFT_VALUE = digitalRead(LEFT_INFA);
     int RIGHT_VALUE = digitalRead(RIGHT_INFA);
 
     //SETS MOTOR VOLTAGE    255 MAX
-    int MOTOR_SPEED = 120;
+    int MOTOR_SPEED = 127;
     analogWrite(MOTOR_VOLT, MOTOR_SPEED - 10);
     analogWrite(MOTOR_VOLTR, MOTOR_SPEED - 10);
 
+
+    //timer
+    if (time > 1220) {
+       Serial.println("Timer done");
+       STOP();
+
     //both detect black activate
-    if (RIGHT_VALUE == HIGH && LEFT_VALUE == HIGH) {
+    } else if (RIGHT_VALUE == HIGH && LEFT_VALUE == HIGH) {
         Serial.println("Both black");
         TURN_LEFT();
 
@@ -70,7 +87,7 @@ void loop() {
 }
 
    //TURNS ROBOT RIGHT
-   void TURN_RIGHT() {
+   void TURN_RIGHT() {   
     digitalWrite(MOTOR_L, HIGH);
     digitalWrite(MOTOR_R, LOW);
    }
@@ -92,8 +109,8 @@ void loop() {
 
    //STOP
    void STOP() {
-    digitalWrite(MOTOR_L, LOW);
-    digitalWrite(MOTOR_R, LOW);
+    digitalWrite(MOTOR_L, HIGH);
+    digitalWrite(MOTOR_R, HIGH);
    }
 
 
